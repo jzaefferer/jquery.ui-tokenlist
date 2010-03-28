@@ -5,7 +5,13 @@
 	<meta http-equiv="Content-type" content="text/html; charset=utf-8" />
 	<title>Token List Demo</title>
 	<link type="text/css" href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.0/themes/base/jquery-ui.css" rel="stylesheet" />
-	<link rel="stylesheet" href="../jquery.tokenlist.css" type="text/css" />	
+	<link rel="stylesheet" href="../jquery.tokenlist.css" type="text/css" />
+	<style>
+		body {
+			font-family: "Trebuchet MS","Helvetica","Arial","Verdana", sans-serif;
+			font-size: 62.5%;
+		}
+	</style>
 </head>
 <body>
 	<h1>Token List Demo</h1>
@@ -15,12 +21,22 @@
 	<label for="test1">Numbers from one to ten please, no duplicates:</label>
 	<input id="test1" type="text" value="one, two, four" class="test"/>
 	
+	<div>
+		Log
+		<div id="log" class="ui-widget ui-widget-content" style="width: 300px; border: 1px solid black; height: 300px; overflow: auto;">
+		</div>
+	</div>
+	
 	<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.js"></script>
 	<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.0/jquery-ui.js"></script>
 	<script type="text/javascript" src="../jquery.tokenlist.js"></script>
 	<script type="text/javascript">
 	$('.test').tokenlist({
-		validate: ['one','two','three','four','five','six','seven','eight','nine','ten']
+		validate: ['one','two','three','four','five','six','seven','eight','nine','ten'],
+		change: function() {
+			$("<div></div>").text("Value is now " + $(this).val()).appendTo("#log");
+			
+		}
 	});
 	</script>
 </body>

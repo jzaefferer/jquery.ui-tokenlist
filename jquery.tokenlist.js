@@ -14,6 +14,7 @@
 $.widget('ui.tokenlist', {
 	
 	options: {
+		items: [],
 		split: /\s*,\s*/,
 		join: ', ',
 		removeTip: "Remove Item",
@@ -24,88 +25,89 @@ $.widget('ui.tokenlist', {
 	_create: function() {
 		var self = this, key = $.ui.keyCode;
 
-		if ( !this.options.items ) {
-			this.options.items = [];
-		}
-
-		if (this.element.is(':text')) {
-			this.textElem = this.element;
-
-			this.textElem
-				// Hide the original field
-				.hide()
-				// Update our list if the original field is changed
-				.bind('change.' + this.widgetName, function() {
-					self.value(self.textElem.val(), true);
-				});
-
-			// Generate a list element to replace the original field
-			this.element =
-				$('<ul/>')
-					.insertAfter(this.textElem)
-					// Allow the widget to also be accessed via the generated element
-					.data(this.widgetName, this);
-		}
-
 		this.element
-				.addClass(this.widgetBaseClass + ' ui-widget ui-widget-content ui-helper-clearfix')
+			// Hide the original field
+			.hide()
+			// Update our list if the original field is changed
+			.bind('change.' + this.widgetName, function() {
+				self.value(self.element.val(), true);
+			});
 
-				.bind('keydown.' + this.widgetName, function(ev) {
-					var focus, disabled = self._getData('disabled');
+		// Generate a list element to replace the original field
+		this.tokenlist =
+			$('<ul/>')
+				.insertAfter(this.element)
+				// Allow the widget to also be accessed via the generated element
+				.data(this.widgetName, this);
 
-					switch (ev.keyCode) {
-					case key.LEFT:
-					case key.UP:
-					case key.BACKSPACE:
-						focus = $(ev.target).closest('li').prev('li');
-						break;
-					case key.RIGHT:
-					case key.DOWN:
-					case key.DELETE:
-						focus = $(ev.target).closest('li').next('li.'+self.widgetBaseClass+'-item');
-						if (!focus.length && !disabled) {
-							focus = self.inputElem;
-						}
-						break;
-					case key.HOME:
-					case key.PAGE_UP:
-						focus = $(ev.target).closest('ul').find('>li:first');
-						break;
-					case key.END:
-					case key.PAGE_DOWN:
+		this.tokenlist
+			.addClass(this.widgetBaseClass + ' ui-widget ui-widget-content ui-helper-clearfix')
+			.bind('keydown.' + this.widgetName, function(ev) {
+				var focus, disabled = self._getData('disabled');
+
+				switch (ev.keyCode) {
+				case key.LEFT:
+				case key.UP:
+				case key.BACKSPACE:
+					focus = $(ev.target).closest('li').prev('li');
+					break;
+				case key.RIGHT:
+				case key.DOWN:
+				case key.DELETE:
+					focus = $(ev.target).closest('li').next('li.'+self.widgetBaseClass+'-item');
+					if (!focus.length && !disabled) {
 						focus = self.inputElem;
-						break;
 					}
+					break;
+				case key.HOME:
+				case key.PAGE_UP:
+					focus = $(ev.target).closest('ul').find('>li:first');
+					break;
+				case key.END:
+				case key.PAGE_DOWN:
+					focus = self.inputElem;
+					break;
+				}
 
-					switch (ev.keyCode) {
-					case key.DELETE:
-					case key.BACKSPACE:
-						if (disabled) {
-							focus = undefined;
-						} else {
-							self._removeItem(ev.target);
-						}
-						break;
+				switch (ev.keyCode) {
+				case key.DELETE:
+				case key.BACKSPACE:
+					if (disabled) {
+						focus = undefined;
+					} else {
+						self._removeItem(ev.target);
 					}
+					break;
+				}
 
-					if (focus && focus.length) {
-						focus[0].focus();
-						ev.stopPropagation();
-						ev.preventDefault();
-					}
-				})
+				if (focus && focus.length) {
+					focus[0].focus();
+					ev.stopPropagation();
+					ev.preventDefault();
+				}
+			})
 
-				// Delete the item if the button is clicked
-				.bind('click.' + this.widgetName, function(ev) {
-					if (!self._getData('disabled')) {
-						if ($(ev.target).is('.'+self.widgetBaseClass+'-remove')) {
-							self._removeItem(ev.target);
-						}
-						if (this === ev.target) {
-							self.inputElem[0].focus();
-						}
+			// Delete the item if the button is clicked
+			.bind('click.' + this.widgetName, function(ev) {
+				if (!self._getData('disabled')) {
+					if ($(ev.target).is('.'+self.widgetBaseClass+'-remove')) {
+						self._removeItem(ev.target);
 					}
-				});
+					if (this === ev.target) {
+						self.inputElem[0].focus();
+					}
+				}
+			});
+		
+		if ($.fn.sortable) {
+			this.tokenlist.sortable({
+				stop: function() {
+					// update items based on list values
+					self.options.items = self.tokenlist.find(".ui-tokenlist-label").map(function() { return $(this).text(); }).get();
+					self._change();
+				}
+			});
+		}
 
 		this.inputElem =
 			$('<input type="text"/>')
@@ -139,18 +141,14 @@ $.widget('ui.tokenlist', {
 
 		// Add the new item input field
 		$('<li/>')
-			.appendTo(this.element)
+			.appendTo(this.tokenlist)
 			.addClass(this.widgetBaseClass+'-input')
 			.append(this.inputElem);
 
-		if (this.textElem) {
-			this.value(this.textElem.val());
-			
-			if (this.textElem[0].disabled) {
-				this.disable();
-			}
-		} else {
-			this.add(this.items());
+		this.value(this.element.val());
+		
+		if (this.element[0].disabled) {
+			this.disable();
 		}
 	},
 
@@ -172,7 +170,7 @@ $.widget('ui.tokenlist', {
 
 	empty: function() {
 		// Remove all existing items
-		$('> li.'+this.widgetBaseClass+'-item', this.element).remove();
+		$('> li.'+this.widgetBaseClass+'-item', this.tokenlist).remove();
 		this.options.items = [];
 		return this;
 	},
@@ -230,7 +228,7 @@ $.widget('ui.tokenlist', {
 	},
 
 	_addItemElem: function(token) {
-		var input = $('.'+this.widgetBaseClass+'-input', this.element),
+		var input = $('.'+this.widgetBaseClass+'-input', this.tokenlist),
 			label =
 				$('<span/>')
 					.addClass(this.widgetBaseClass+'-label')
@@ -271,12 +269,8 @@ $.widget('ui.tokenlist', {
 	},
 
 	_change: function() {
-		if (this.textElem) {
-			this.textElem
-				.val(this._stringify(this.items()))
-				.trigger('change');
-		}
-		this.element.trigger('change');
+		this.element.val(this._stringify(this.items()));
+		this._trigger('change');
 	},
 	
 	_getData: function(data) {
