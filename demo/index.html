@@ -1,0 +1,28 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+	"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+	<meta http-equiv="Content-type" content="text/html; charset=utf-8" />
+	<title>Token List Demo</title>
+	<link type="text/css" href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.0/themes/base/jquery-ui.css" rel="stylesheet" />
+	<link rel="stylesheet" href="../jquery.tokenlist.css" type="text/css" />	
+</head>
+<body>
+	<h1>Token List Demo</h1>
+	
+	<p>Convert a plain text field into a facebook style list builder:</p>
+	
+	<label for="test1">Numbers from one to ten please, no duplicates:</label>
+	<input id="test1" type="text" value="one, two, four" class="test"/>
+	
+	<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.js"></script>
+	<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.0/jquery-ui.js"></script>
+	<script type="text/javascript" src="../jquery.tokenlist.js"></script>
+	<script type="text/javascript">
+	$('.test').tokenlist({
+		validate: ['one','two','three','four','five','six','seven','eight','nine','ten']
+	});
+	</script>
+</body>
+</html>
+

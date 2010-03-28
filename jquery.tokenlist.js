@@ -1,17 +1,27 @@
 /*!
- * jQuery UI Token List @VERSION
+ * jQuery Token List Plugin
  *
- * Copyright (c) 2009 Adaptavist.com
+ * Copyright 2010 Jörn Zaefferer
  * Dual licensed under the MIT and GPL licenses.
- */
-/* Depends:
- *  ui.core.js
+ * 
+ * Based on work by Mark Gibson (http://github.com/jollytoad/jquery.ui-tokenlist)
+ *
+ * Depends:
+ *  jquery.ui.widget.js
  */
 (function($) {
 
 $.widget('ui.tokenlist', {
+	
+	options: {
+		split: /\s*,\s*/,
+		join: ', ',
+		removeTip: "Remove Item",
+		duplicates: false,
+		validate: false // May be false, an array of allowed values, or a validation function
+	},
 
-	_init: function() {
+	_create: function() {
 		var self = this, key = $.ui.keyCode;
 
 		if ( !this.options.items ) {
@@ -116,6 +126,14 @@ $.widget('ui.tokenlist', {
 				.bind('change.' + this.widgetName, function() {
 					if (self.add($(this).val()).length) {
 						$(this).val('');
+					}
+				}).autocomplete({
+					source: this.options.validate,
+					delay: 0,
+					select: function() {
+						setTimeout(function() {
+							self.inputElem.trigger("change.tokenlist");
+						}, 13);
 					}
 				});
 
@@ -259,19 +277,10 @@ $.widget('ui.tokenlist', {
 				.trigger('change');
 		}
 		this.element.trigger('change');
-	}
-});
-
-$.extend($.ui.tokenlist, {
-	getter: "add input items value",
-	version: "@VERSION",
-
-	defaults: {
-		split: /\s*,\s*/,
-		join: ', ',
-		removeTip: "Remove Item",
-		duplicates: false,
-		validate: false // Maybe false, an array of allowed values, or a validation function
+	},
+	
+	_getData: function(data) {
+		return this.options[data];
 	}
 });
 
