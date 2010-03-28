@@ -8,6 +8,9 @@
  *
  * Depends:
  *  jquery.ui.widget.js
+ *  jquery.ui.autocomplete.js
+ * Optional:
+ *  jquery.ui.sortable.js (which depends on jquery.ui.mouse.js)
  */
 (function($) {
 
